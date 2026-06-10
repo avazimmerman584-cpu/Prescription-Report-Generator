@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/gifthealth/event'
+require_relative '../lib/gifthealth/prescription'
+require_relative '../lib/gifthealth/patient'
+require_relative '../lib/gifthealth/pharmacy_system'
+require_relative '../lib/gifthealth/report'
+
+input_file = ARGV[0]
+
+pharmacy_system = Gifthealth::PharmacySystem.new
+
+if input_file
+  # File input mode
+  unless File.exist?(input_file)
+    puts "Error: File '#{input_file}' not found"
+    exit 1
+  end
+
+  File.open(input_file, 'r') do |file|
+    pharmacy_system.process_stream(file)
+  end
+else
+  # stdin mode
+  pharmacy_system.process_stream($stdin)
+end
+
+Gifthealth::Report.generate(pharmacy_system)
